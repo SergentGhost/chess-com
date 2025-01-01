@@ -1,0 +1,143 @@
+// Base Chess Game Code in C# with a Separate Game Window
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public class ChessGame
+{
+    public static void Main(string[] args)
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new ChessForm());
+    }
+}
+
+public class ChessForm : Form
+{
+    private ChessBoard board;
+    private Panel boardPanel;
+
+    public ChessForm()
+    {
+        Text = "Chess Game";
+        Size = new Size(600, 650);
+
+        board = new ChessBoard();
+        board.Initialize();
+
+        boardPanel = new Panel
+        {
+            Size = new Size(600, 600),
+            Location = new Point(0, 0)
+        };
+        Controls.Add(boardPanel);
+
+        DrawBoard();
+    }
+
+    private void DrawBoard()
+    {
+        boardPanel.Controls.Clear();
+
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                Label square = new Label
+                {
+                    Size = new Size(70, 70),
+                    Location = new Point(j * 70, i * 70),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = new Font("Arial", 24, FontStyle.Bold)
+                };
+
+                if ((i + j) % 2 == 0)
+                {
+                    square.BackColor = Color.Beige;
+                }
+                else
+                {
+                    square.BackColor = Color.Brown;
+                    square.ForeColor = Color.White;
+                }
+
+                square.Text = board.GetPiece(i, j).ToString();
+                boardPanel.Controls.Add(square);
+            }
+        }
+    }
+}
+
+public class ChessBoard
+{
+    private char[,] board;
+
+    public ChessBoard()
+    {
+        board = new char[8, 8];
+    }
+
+    // Initialize the chessboard with default positions
+    public void Initialize()
+    {
+        string[] initialSetup = {
+            "rnbqkbnr",
+            "pppppppp",
+            "........",
+            "........",
+            "........",
+            "........",
+            "PPPPPPPP",
+            "RNBQKBNR"
+        };
+
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                board[i, j] = initialSetup[i][j];
+            }
+        }
+    }
+
+    // Get the piece at a specific position
+    public char GetPiece(int row, int col)
+    {
+        return board[row, col];
+    }
+
+    // Make a move (basic implementation without validation)
+    public bool MakeMove(string move)
+    {
+        if (move.Length != 5 || move[2] != ' ')
+        {
+            return false; // Invalid format
+        }
+
+        int startX = 8 - int.Parse(move[1].ToString());
+        int startY = move[0] - 'a';
+        int endX = 8 - int.Parse(move[4].ToString());
+        int endY = move[3] - 'a';
+
+        if (startX < 0 || startX >= 8 || startY < 0 || startY >= 8 ||
+            endX < 0 || endX >= 8 || endY < 0 || endY >= 8)
+        {
+            return false; // Out of bounds
+        }
+
+        char piece = board[startX, startY];
+        if (piece == '.')
+        {
+            return false; // No piece to move
+        }
+
+        board[startX, startY] = '.';
+        board[endX, endY] = piece;
+
+        return true;
+    }
+}
+
